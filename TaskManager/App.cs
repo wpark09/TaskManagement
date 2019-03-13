@@ -16,8 +16,6 @@ namespace TaskManager
 
         string path = @"C:\Users\wpark\Documents\ToDoList.txt";
 
-
-
         public App()
         {
             Console.OutputEncoding = System.Text.Encoding.Unicode;
@@ -79,7 +77,7 @@ namespace TaskManager
             int totalPages;
             totalPages = (totalTasks / tasksPerPage) + 1;
 
-            var page = (0 / tasksPerPage) * pageNumber;
+            var page = (pageNumber / tasksPerPage);
             var startingPoint = FirstElementInPage(page);
             int EndingPoint = FirstElementInPage(page + 1);
 
@@ -121,39 +119,97 @@ namespace TaskManager
                         valid = true;
                         break;
                     case ConsoleKey.N:
+                        pageNumber = 1;
+                        NextPage();
                         Console.Clear();
-                        int i;
-                        try
-                        {
-                            for (i = (pageNumber * tasksPerPage); (i / tasksPerPage) < (pageNumber + 1); ++i)
-                            {
-                                if (taskList[i].Contains(invisibleMarker))
-                                {
-                                    Console.BackgroundColor = ConsoleColor.DarkBlue;
-                                    Console.ForegroundColor = ConsoleColor.White;
-                                    Console.WriteLine($"{i + 1}. {taskList[i].Trim(invisibleMarker)}");
-                                    Console.ResetColor();
-                                }
-                                else
-                                {
-                                    Console.WriteLine($"{i + 1}. {taskList[i]}");
-                                }
-                            }
-                            pageNumber++;
-
-                        }
-                        catch (ArgumentOutOfRangeException)
-                        {; }
-                        {
-                            Console.WriteLine("=======================================================================================");
-                            Console.WriteLine("     End of List\n");
-                        }
                         break;
                     case ConsoleKey.Q:
+                        DisplayMenu();
                         valid = true;
                         break;
                 }
             } while (!valid);
+        }
+
+        private void NextPage()
+        {
+            Console.Clear();
+            bool valid = false;
+            int count;
+            int pageNumber = 1;
+            for (pageNumber = 1; pageNumber < taskList.Count / tasksPerPage; ++pageNumber)
+            {
+                for (count = (pageNumber * tasksPerPage); count < ((pageNumber + 1) * tasksPerPage); ++count)
+                {
+                    if (taskList[count].Contains(invisibleMarker))
+                    {
+                        Console.BackgroundColor = ConsoleColor.DarkBlue;
+                        Console.ForegroundColor = ConsoleColor.White;
+                        Console.WriteLine($"{count + 1}. {taskList[count].Trim(invisibleMarker)}");
+                        Console.ResetColor();
+                    }
+                    else
+                    {
+                        Console.WriteLine($"{count + 1}. {taskList[count]}");
+                    }
+                }
+                PrintListMenu();
+                pageNumber++;
+                var input = GetUserInput();
+                do
+                {
+                    switch (input)
+                    {
+                        case ConsoleKey.S:
+                            SelectTask();
+                            valid = true;
+                            break;
+                        case ConsoleKey.N:
+                            Console.Clear();
+                            pageNumber = 2;
+                            try
+                            {
+                                for (count = (pageNumber * tasksPerPage); count < ((pageNumber + 1) * tasksPerPage); ++count)
+                                {
+                                    if (taskList[count].Contains(invisibleMarker))
+                                    {
+                                        Console.BackgroundColor = ConsoleColor.DarkBlue;
+                                        Console.ForegroundColor = ConsoleColor.White;
+                                        Console.WriteLine($"{count + 1}. {taskList[count].Trim(invisibleMarker)}");
+                                        Console.ResetColor();
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine($"{count + 1}. {taskList[count]}");
+                                    }
+                                }
+                            }
+
+                            catch (ArgumentOutOfRangeException)
+                            {
+                                ;
+                            }
+                            {
+                                Console.WriteLine("=======================================================================================");
+                                Console.WriteLine("     End of List\n");
+                            }
+                            break;
+                        case ConsoleKey.Q:
+                            DisplayMenu();
+                            valid = true;
+                            break;
+                    }
+                } while (!valid);
+
+            }
+
+
+        }
+
+        private int getPage(int i)
+        {
+            return i / tasksPerPage;
+
         }
 
         private static int FirstElementInPage(int page)
@@ -163,7 +219,7 @@ namespace TaskManager
 
         private void RemoveFirstActionedItems()
         {
-            int i = 0;
+            int i = getPage(0) * tasksPerPage;
 
             if (taskList[i].Contains(invisibleMarker))
             {
@@ -235,9 +291,6 @@ namespace TaskManager
             }
         }
 
-    
-        
-
         private void AddATask()
         {
             string task;
@@ -264,7 +317,7 @@ namespace TaskManager
                             valid = true;
                             break;
                         case ConsoleKey.Q:
-                            DisplayTasks();
+                            DisplayMenu();
                             valid = true;
                             break;
                     }
@@ -279,7 +332,7 @@ namespace TaskManager
             {
                 taskList = new List<string>(File.ReadAllLines(path));
             }
-            
+
             catch (FileNotFoundException)
             {
                 Console.WriteLine("File does not exist.");
@@ -289,7 +342,7 @@ namespace TaskManager
         private void WriteListToFile()
         {
             StreamWriter sw = new StreamWriter(path); //Add true bool inside parameter
-                                         //skips creating txt file if it exists
+                                                      //skips creating txt file if it exists
 
             foreach (string element in taskList)
                 sw.Write($"{element}\r\n");
