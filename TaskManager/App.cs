@@ -71,13 +71,8 @@ namespace TaskManager
 
         private void DisplayTasks()
         {
-            RemoveFirstActionedItems();
-            TaskList();
-        }
-
-        private void TaskList()
-        {
             Console.Clear();
+            RemoveFirstActionedItems();
 
             int totalTasks = taskList.Count;
             int pageNumber = 0;
@@ -109,7 +104,8 @@ namespace TaskManager
                 Console.WriteLine();
 
             }
-            catch { Exception e; }
+            catch (ArgumentOutOfRangeException)
+            {; }
             PrintListMenu();
 
             bool valid = false;
@@ -129,7 +125,7 @@ namespace TaskManager
                         int i;
                         try
                         {
-                            for (i= (pageNumber*tasksPerPage); (i / tasksPerPage) < (pageNumber + 1); ++i)
+                            for (i = (pageNumber * tasksPerPage); (i / tasksPerPage) < (pageNumber + 1); ++i)
                             {
                                 if (taskList[i].Contains(invisibleMarker))
                                 {
@@ -146,8 +142,8 @@ namespace TaskManager
                             pageNumber++;
 
                         }
-                        catch
-                        (ArgumentOutOfRangeException e)
+                        catch (ArgumentOutOfRangeException)
+                        {; }
                         {
                             Console.WriteLine("=======================================================================================");
                             Console.WriteLine("     End of List\n");
@@ -192,10 +188,9 @@ namespace TaskManager
             Console.Clear();
             Console.WriteLine($"\n\n\n{taskList[userSelect - 1]}\n\n\n");
             Console.ForegroundColor = ConsoleColor.DarkYellow;
-
-            Console.WriteLine("=======================================================================================");
-            Console.WriteLine("Menu:             C: Mark as complete   ||   A: Add task back to the list   ||   Q: Quit");
-            Console.WriteLine("=======================================================================================");
+            Console.WriteLine("================================================================================================================");
+            Console.WriteLine("Menu||   C: Mark as complete   ||   A: Add task back to the list   ||   D: Delete the task   ||   Q: Quit");
+            Console.WriteLine("================================================================================================================");
             Console.ResetColor();
             int i = 0;
             int pageNumber = userSelect / tasksPerPage;
@@ -227,6 +222,10 @@ namespace TaskManager
                 case ConsoleKey.A://add task back to the bottom of the list
                     Console.Clear();
                     taskList.Insert(pageNumber * tasksPerPage + (tasksPerPage - 1), taskList[userSelect - 1]);
+                    taskList.RemoveAt(userSelect - 1);
+                    DisplayTasks();
+                    break;
+                case ConsoleKey.D:
                     taskList.RemoveAt(userSelect - 1);
                     DisplayTasks();
                     break;
